@@ -1,0 +1,91 @@
+version: "3"
+services:
+  eureka:
+    image: eureka
+	container_name: eureka
+	build: ./eureka/eureka
+	ports:
+	  - "8761:8761"
+	networks:
+	  - app-network
+	  
+  security:
+    image: security
+	container_name: security
+	build: ./securityservice
+	ports:
+	  - "8090:8090"
+	networks:
+	  - app-network
+	depends_on:
+	  - eureka
+	  - postgres
+  gateway:
+    image: gateway
+	container_name: gateway
+	build: ./Gateway/Gateway
+	ports:
+	  - "8060:8060"
+	networks:
+	  -app-network
+	depends_on:
+	  - eureka
+	  - postgres
+  interview:
+    image: interview
+	container_name: interview
+	build: ./Interview/Interview
+	ports:
+	  - "8081:8081"
+	networks:
+	  - app-network
+	depends_on:
+	  - eureka
+	  - postgres
+  employee:
+    image: employee
+	container_name: employee
+	build: ./Employee/Employee
+	ports:
+	  - "9090:9090"
+	networks:
+	  - app-network
+	depends_on:
+	  - eureka
+	  - postgres
+  project:
+    image: project
+	container_name: project
+	build: ./Project/Project
+	ports:
+	  - "8082:8082"
+	networks:
+	  - app-network
+	depends_on:
+	  - eureka
+	  - postgres
+	  
+  postgres:
+    image: postgres:15
+	container_name: postgres
+	ports:
+	  - "5432:5432"
+	environment:
+	  POSTGRES_USER: postgres
+	  POSTGRES_PASSWORD: 0000
+	  POSTGRES_DB: postgresdb
+    networks:
+	  - app-network
+	volumes:
+	  - postgres_data: /var/lib/postgresql/data
+	  - ./create-databases.sql:/docker-entrypoint-initdb.d/create-databases.sql
+  
+  
+  
+networks:
+  app-network:
+    driver: bridge
+	
+volumes:
+  postgres_data:
+  
